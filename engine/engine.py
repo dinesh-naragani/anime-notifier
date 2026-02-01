@@ -1,0 +1,71 @@
+import time
+from datetime import datetime, timezone, timedelta
+
+from engine.feed import fetch_feed
+from engine.classify import classify
+from engine.state import load_set, save_set
+from engine.metadata import resolve_metadata
+from engine.discord import send_release
+from engine.anime_index import ANIME_INDEX, WHITELIST_ANIDB
+
+
+def run(
+    notified_file: str,
+    magnet_webhook: str,
+    torrent_webhook: str,
+    test: bool = False,
+):
+    print(f"🔎 Fetching AnimeTosho JSON (test={test})")
+    feed = fetch_feed()
+    print(f"📦 Entries fetched: {len(feed)}")
+
+    notified = set() if test else load_set(notified_file)
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+
+    sent = 0
+
+    for e in feed:
+        aid = e.get("anidb_aid")
+        eid = e.get("anidb_eid")
+
+        if aid not in WHITELIST_ANIDB:
+            continue
+
+        # skip entries without episode id
+        if eid is None:
+            continue
+
+        if test:
+            ts = datetime.fromtimestamp(e["timestamp"], tz=timezone.utc)
+            if ts < cutoff:
+                continue
+
+        codec = classify(e["title"])
+        if not codec:
+            continue
+
+        dedupe_key = f"{aid}|{eid}|{codec}"
+        if dedupe_key in notified:
+            continue
+
+        meta = resolve_metadata(aid, ANIME_INDEX)
+
+        print(f"✔ SEND | {ANIME_INDEX[aid]['title']} | {codec}")
+
+        send_release(
+            entry=e,
+            title=ANIME_INDEX[aid]["title"],
+            codec=codec,
+            image=meta["image"],
+            magnet_webhook=magnet_webhook,
+            torrent_webhook=torrent_webhook,
+        )
+
+        # immediate persistence (parity with prod)
+        notified.add(dedupe_key)
+        save_set(notified_file, notified)
+
+        sent += 1
+        time.sleep(5)
+
+    print(f"✅ Sent: {sent}")
