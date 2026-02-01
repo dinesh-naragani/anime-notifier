@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+
+notified_episodes.txt
+seen_ids.txt
+anime_metadata.json
+
+.env
