@@ -197,6 +197,10 @@ def run(test=False):
         if aid not in WHITELIST_ANIDB:
             continue
 
+        # ✅ FIX 1: Skip entries without episode ID
+        if eid is None:
+            continue
+
         if test:
             ts = datetime.fromtimestamp(e["timestamp"], tz=timezone.utc)
             if ts < cutoff:
@@ -223,12 +227,12 @@ def run(test=False):
             DISCORD_TEST_TORRENT_WEBHOOK if test else DISCORD_TORRENT_WEBHOOK,
         )
 
+        # ✅ FIX 2: Immediate persistence
         notified.add(dedupe_key)
+        save_set(NOTIFIED_FILE, notified)
+
         sent += 1
         time.sleep(5)
-
-    if not test:
-        save_set(NOTIFIED_FILE, notified)
 
     print(f"✅ Sent: {sent}")
 
