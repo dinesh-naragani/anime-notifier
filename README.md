@@ -217,3 +217,7 @@ Built and operated by **Dinesh Naragani**,
 Self-hosted on a personal server using Termux.
 
 ---
+
+## 📜 License
+
+MIT
