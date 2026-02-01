@@ -6,6 +6,11 @@ source ~/serverenv/bin/activate
 
 while true
 do
-  python animetosho_watcher.py
+  echo "▶️ Running new engine..."
+  python -m engine.main || {
+    echo "⚠️ Engine failed — falling back to legacy watcher"
+    python animetosho_watcher.py
+  }
+
   sleep 60
 done

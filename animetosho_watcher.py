@@ -22,8 +22,7 @@ socket.getaddrinfo = _ipv4_only_getaddrinfo
 # ==================================================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-NOTIFIED_FILE = os.path.join(BASE_DIR, "notified_episodes.txt")
-
+NOTIFIED_FILE = os.path.join(BASE_DIR, "notified_episodes_engine.txt")
 # ==================================================
 # CONFIG
 # ==================================================
