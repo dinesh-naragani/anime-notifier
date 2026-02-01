@@ -1,8 +1,13 @@
+# Python
 __pycache__/
 *.pyc
 
-notified_episodes.txt
-seen_ids.txt
-anime_metadata.json
+# Virtual env
+serverenv/
 
-.env
+# Runtime state
+notified_episodes.txt
+notified_episodes_engine.txt
+
+# OS
+.DS_Store
